@@ -8,11 +8,11 @@ export default async function deserialiseUser(
     res: Response,
     next: NextFunction
 ) {
-    const authHeaders = req.headers['authorization'];
+    //we get the cookies from either the local storage or from the cookies
+    const token =
+        get(req, 'cookies.accessToken') ||
+        get(req, 'headers.authorization', '').replace(/^Bearer\s/, '');
 
-    if (!authHeaders || !authHeaders.startsWith('Bearer ')) return next();
-
-    const token = authHeaders.split(' ')[1];
     if (!token) return next();
 
     const { decoded, expired } = verifyJwt(token);
@@ -21,7 +21,9 @@ export default async function deserialiseUser(
         res.locals.user = decoded;
         return next();
     }
-    const refreshToken = get(req, 'headers.x-refresh');
+    // we get the refreshtoken from the headers or from the cookies
+    const refreshToken =
+        get(req, 'headers.x-refresh') || get(req, 'cookies.refreshToken');
 
     if (expired && refreshToken) {
         //need to generate a new access token
@@ -33,7 +35,15 @@ export default async function deserialiseUser(
 
         if (decoded) {
             res.locals.user = decoded;
-            res.setHeader('x-access-token', newAccessToken);
+            res.setHeader('x-access-token', newAccessToken); //this stores it in the local storage if the user does not allow for the useage of cookies in their site
+            res.cookie('accessToken', newAccessToken, {
+                maxAge: 900000, //15 min in miliseconds
+                httpOnly: true, //means that the cookie can be only accessed using http requests and not via normal js
+                domain: 'localhost', //this is because we are doing this in localhost.change this in prod,
+                path: '/',
+                sameSite: 'strict',
+                secure: false, //this means that currently we will be able to use this in https requests as well
+            });
         }
     }
 

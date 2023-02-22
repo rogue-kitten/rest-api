@@ -35,6 +35,25 @@ export async function createSessionHandler(
         { expiresIn: String(process.env.REFRESH_TOKEN_TTL) }
     );
 
+    // add the accesstoken to the cookies
+    res.cookie('accessToken', accessToken, {
+        maxAge: 900000, //15 min in miliseconds
+        httpOnly: true, //means that the cookie can be only accessed using http requests and not via normal js
+        domain: 'localhost', //this is because we are doing this in localhost.change this in prod,
+        path: '/',
+        sameSite: 'strict',
+        secure: false, //this means that currently we will be able to use this in https requests as well
+    });
+
+    res.cookie('refreshToken', refreshToken, {
+        maxAge: 3.154e10, //1year in miliseconds
+        httpOnly: true, //means that the cookie can be only accessed using http requests and not via normal js
+        domain: 'localhost', //this is because we are doing this in localhost.change this in prod,
+        path: '/',
+        sameSite: 'strict',
+        secure: false, //this means that currently we will be able to use this in https requests as well
+    });
+
     //send accessToken and refreshToken
     res.send({ accessToken, refreshToken });
 }

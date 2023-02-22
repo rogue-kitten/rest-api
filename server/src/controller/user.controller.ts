@@ -10,6 +10,16 @@ export async function createUserHandler(
     >,
     res: Response
 ) {
-    const user = await createUser(req.body);
-    res.status(201).send(user);
+    try {
+        const user = await createUser(req.body);
+        res.status(201).send(user);
+    } catch (e) {
+        res.status(400).send({
+            message: 'Email already exists',
+        });
+    }
+}
+
+export async function getCurrentUserHandler(req: Request, res: Response) {
+    res.send(res.locals.user);
 }
