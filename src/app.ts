@@ -1,3 +1,4 @@
+import deserialiseUser from '@/middleware/deserialiseUser';
 import connectDB from '@/utils/connectDB';
 import compression from 'compression';
 import cors from 'cors';
@@ -14,6 +15,7 @@ export default function App() {
     app.use(morgan('dev'));
     app.use(express.json());
     app.use(express.urlencoded({ extended: false }));
+    app.use(deserialiseUser);
     app.use(compression());
 
     app.listen(Number(process.env.PORT), () => {

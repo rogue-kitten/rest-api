@@ -43,7 +43,7 @@ userSchema.pre('save', async function (next) {
 
 userSchema.methods.confirmPassword = async function (password: string) {
     const user = this as UserDocument;
-    return await bcrypt.compare(user.password, password).catch((e) => false);
+    return await bcrypt.compare(password, user.password).catch((e) => false);
 };
 
 export default model<UserDocument>('User', userSchema);
